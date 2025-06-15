@@ -2,47 +2,98 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, SoftDeletes;
 
     /**
-     * Kolom yang boleh diisi saat mass assignment.
+     * Kolom yang bisa diisi massal
      *
-     * @var list<string>
+     * @var array<int, string>
      */
     protected $fillable = [
         'name',
         'email',
         'password',
+        'avatar',
+        'role',
+        'phone',
+        'address',
+        'email_verified_at',
     ];
 
     /**
-     * Kolom yang disembunyikan saat serialisasi (contoh: ke JSON).
+     * Kolom yang harus disembunyikan
      *
-     * @var list<string>
+     * @var array<int, string>
      */
     protected $hidden = [
         'password',
         'remember_token',
+        'deleted_at', // Tambahkan ini untuk menyembunyikan deleted_at dari serialization
     ];
 
     /**
-     * Kolom yang perlu di-cast (otomatis diubah ke tipe tertentu).
+     * Casting tipe data
      *
-     * @return array<string, string>
+     * @var array<string, string>
      */
-    protected function casts(): array
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+    ];
+
+    /**
+     * Aksesor untuk URL avatar
+     */
+    public function getAvatarUrlAttribute(): ?string
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed', // Laravel otomatis bcrypt password!
-        ];
+        if ($this->avatar) {
+            return asset('storage/' . $this->avatar);
+        }
+        
+        return asset('images/default-avatar.png');
+    }
+
+    /**
+     * Cek apakah user admin
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    /**
+     * Scope untuk query admin
+     */
+    public function scopeAdmins($query)
+    {
+        return $query->where('role', 'admin');
+    }
+
+    /**
+     * Scope untuk query user biasa
+     */
+    public function scopeRegularUsers($query)
+    {
+        return $query->where('role', 'user');
+    }
+
+    /**
+     * Boot the model.
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($user) {
+            // Tambahan logika sebelum delete jika diperlukan
+        });
     }
 }
