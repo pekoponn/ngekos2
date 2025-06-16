@@ -207,6 +207,7 @@
                                    Rp {{ number_format($kos->price, 0, ',', '.') }} <span>/bulan</span>
                                 </div>
 
+
                                 <a href="{{ route('boarding-houses.show', $kos->slug) }}"
                                    class="btn-detail"><i class="fas fa-eye mr-2 ml-1">
                                    </i>Lihat Detail Lengkap</a>
