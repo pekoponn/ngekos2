@@ -17,6 +17,7 @@ class BoardingHouse extends Model
         'description',
         'price',
         'address',
+        'phone_number',
     ];
 
     public function city(): BelongsTo

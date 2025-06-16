@@ -55,6 +55,10 @@ class BoardingHouseResource extends Resource
                 ->required(),
                 Forms\Components\Textarea::make('address')
                 ->required(),
+                Forms\Components\TextInput::make('phone_number')  // <- Tambahkan ini
+                ->label('Nomor Telepon Pemilik Kos')
+                ->tel()
+                ->required(),
             ]),
             Forms\Components\Tabs\Tab::make('Bonus Ngekos')
             ->schema([
