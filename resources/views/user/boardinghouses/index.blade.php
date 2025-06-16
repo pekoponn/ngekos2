@@ -663,20 +663,6 @@
             </button>
         </div>
     </form>
-
-    <section class="kos-listings">
-        <h2>Daftar Kos Tersedia</h2>
-        
-        <!-- Results Info -->
-        <div class="results-info">
-            @if($boardingHouses->total() > 0)
-                Menampilkan {{ $boardingHouses->firstItem() }} - {{ $boardingHouses->lastItem() }} 
-                dari {{ $boardingHouses->total() }} kos
-                @if(request()->hasAny(['search', 'city', 'category']))
-                    yang sesuai dengan pencarian Anda
-                @endif
-            @endif
-        </div>
         
         @if($boardingHouses->count() > 0)
             <div class="kos-grid">
