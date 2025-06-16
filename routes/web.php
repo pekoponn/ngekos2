@@ -10,29 +10,21 @@ Route::get('/', function () {
     return view('welcome');
 })->name('welcome');
 
-// ==========================
-// AUTHENTIKASI
-// ==========================
-
-// Login
+// Authentication Routes
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
-
-// Register
 Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
 Route::post('/register', [RegisterController::class, 'register'])->name('register.submit');
-
-// Logout (harus pakai POST dan middleware auth)
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
 
-// ==========================
-// FITUR UNTUK USER LOGIN
-// ==========================
-
+// Authenticated Routes
 Route::middleware('auth')->group(function () {
-    // Dashboard berisi daftar kos
-    Route::get('/dashboard', [BoardingHouseController::class, 'index'])->name('dashboard');
-
-    // Detail kos berdasarkan slug
-    Route::get('/boarding-house/{slug}', [BoardingHouseController::class, 'show'])->name('boarding-house.show');
+    // Boarding Houses Resource
+    Route::get('/boarding-houses', [BoardingHouseController::class, 'index'])->name('boarding-houses.index');
+    Route::get('/boarding-houses/{slug}', [BoardingHouseController::class, 'show'])->name('boarding-houses.show');
+    
+    // Optional Dashboard
+    Route::get('/dashboard', function() {
+        return redirect()->route('boarding-houses.index');
+    })->name('dashboard');
 });
