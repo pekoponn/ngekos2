@@ -622,39 +622,47 @@
         </div>
     @endif
 
-    <div class="filters">
-        <div class="filter-item">
-            <label for="city">
-                <i class="fas fa-map-marker-alt"></i> Kota
-            </label>
-            <select name="city" id="city">
-                <option value="">Semua Kota</option>
-                @foreach($cities as $city)
-                    <option value="{{ $city->slug }}" {{ request('city') == $city->slug ? 'selected' : '' }}>
-                        {{ $city->name }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
+    <!-- Form Filter yang Diperbaiki -->
+    <form id="filter-form" action="{{ route('boarding-houses.index') }}" method="GET">
+        <!-- Simpan parameter search jika ada -->
+        @if(request('search'))
+            <input type="hidden" name="search" value="{{ request('search') }}">
+        @endif
         
-        <div class="filter-item">
-            <label for="category">
-                <i class="fas fa-home"></i> Kategori
-            </label>
-            <select name="category" id="category">
-                <option value="">Semua Kategori</option>
-                @foreach($categories as $category)
-                    <option value="{{ $category->slug }}" {{ request('category') == $category->slug ? 'selected' : '' }}>
-                        {{ $category->name }}
-                    </option>
-                @endforeach
-            </select>
+        <div class="filters">
+            <div class="filter-item">
+                <label for="city">
+                    <i class="fas fa-map-marker-alt"></i> Kota
+                </label>
+                <select name="city" id="city">
+                    <option value="">Semua Kota</option>
+                    @foreach($cities as $city)
+                        <option value="{{ $city->slug }}" {{ request('city') == $city->slug ? 'selected' : '' }}>
+                            {{ $city->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            
+            <div class="filter-item">
+                <label for="category">
+                    <i class="fas fa-home"></i> Kategori
+                </label>
+                <select name="category" id="category">
+                    <option value="">Semua Kategori</option>
+                    @foreach($categories as $category)
+                        <option value="{{ $category->slug }}" {{ request('category') == $category->slug ? 'selected' : '' }}>
+                            {{ $category->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            
+            <button type="submit" class="btn-filter">
+                <i class="fas fa-filter"></i> Filter
+            </button>
         </div>
-        
-        <button type="button" class="btn-filter">
-            <i class="fas fa-filter"></i> Filter
-        </button>
-    </div>
+    </form>
 
     <section class="kos-listings">
         <h2>Daftar Kos Tersedia</h2>
@@ -676,7 +684,7 @@
                     <div class="kos-card">
                         <img src="{{ $kos->thumbnail ? asset('storage/' . $kos->thumbnail) : 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=250&fit=crop' }}" 
                              alt="{{ $kos->name }}" 
-                             onerror="this.src='">
+                             onerror="this.src='https://via.placeholder.com/400x250?text=No+Image'">
                         
                         <div class="card-content">
                             @if($kos->category)
@@ -737,48 +745,18 @@
 
 @section('scripts')
 <script>
-    // Filter functionality
-    document.querySelector('.btn-filter').addEventListener('click', function() {
-        const city = document.getElementById('city').value;
-        const category = document.getElementById('category').value;
-        const currentSearch = new URLSearchParams(window.location.search).get('search');
-        
-        const url = new URL(window.location.href);
-        
-        // Preserve search term
-        if (currentSearch) {
-            url.searchParams.set('search', currentSearch);
-        }
-        
-        // Set or remove city filter
-        if(city) {
-            url.searchParams.set('city', city);
-        } else {
-            url.searchParams.delete('city');
-        }
-        
-        // Set or remove category filter
-        if(category) {
-            url.searchParams.set('category', category);
-        } else {
-            url.searchParams.delete('category');
-        }
-        
-        // Remove pagination to start from first page
-        url.searchParams.delete('page');
-        
-        window.location.href = url.toString();
-    });
-
-    // Remove individual filter
+    // Fungsi untuk menghapus filter
     function removeFilter(filterType) {
         const url = new URL(window.location.href);
         url.searchParams.delete(filterType);
-        url.searchParams.delete('page'); // Reset to first page
-        window.location.href = url.toString();
+        url.searchParams.delete('page'); // Reset ke halaman pertama
+        
+        // Submit form filter setelah menghapus parameter
+        document.getElementById('filter-form').action = url.toString();
+        document.getElementById('filter-form').submit();
     }
 
-    // Auto-submit search form with debounce
+    // Auto-submit search form dengan debounce
     let searchTimeout;
     const searchInput = document.querySelector('.search-bar input[name="search"]');
     
@@ -793,7 +771,7 @@
         });
     }
 
-    // Enhanced card animations
+    // Animasi kartu kos
     const observerOptions = {
         threshold: 0.1,
         rootMargin: '0px 0px -50px 0px'
@@ -810,7 +788,7 @@
         });
     }, observerOptions);
 
-    // Observe all kos cards
+    // Terapkan animasi pada semua kartu kos
     document.querySelectorAll('.kos-card').forEach(card => {
         card.style.opacity = '0';
         card.style.transform = 'translateY(30px)';
@@ -818,7 +796,7 @@
         observer.observe(card);
     });
 
-    // Loading indicator for filter changes
+    // Loading indicator
     function showLoading() {
         const grid = document.querySelector('.kos-grid');
         if (grid) {
@@ -827,8 +805,7 @@
         }
     }
 
-    // Add loading state to buttons
-    document.querySelector('.btn-filter').addEventListener('click', showLoading);
-    document.querySelector('.search-bar').addEventListener('submit', showLoading);
+    // Tambahkan loading state saat filter di-submit
+    document.getElementById('filter-form').addEventListener('submit', showLoading);
 </script>
 @endsection
