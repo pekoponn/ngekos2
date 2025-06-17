@@ -870,7 +870,7 @@ html {
             <div class="card-body">
                 <h2 class="section-title">
                     <i class="fas fa-bed"></i>
-                    Tipe Kamar Tersedia
+                    Kamar {{ $boardingHouse->name }}
                 </h2>
                 <div class="grid-2">
                     @foreach($boardingHouse->rooms as $room)
